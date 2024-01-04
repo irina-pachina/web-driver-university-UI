@@ -2,14 +2,15 @@ package com.webdriveruniversity.tests;
 
 import com.codeborne.selenide.junit5.ScreenShooterExtension;
 import com.webdriveruniversity.pages.LoginPortalPage;
-import org.junit.jupiter.api.Assertions;
 import org.junit.jupiter.api.BeforeAll;
 import org.junit.jupiter.api.Test;
 import org.junit.jupiter.api.extension.ExtendWith;
+import org.openqa.selenium.remote.DesiredCapabilities;
 
-import static com.codeborne.selenide.Configuration.baseUrl;
-// import static com.codeborne.selenide.Configuration.browser;
-import static com.codeborne.selenide.Configuration.reportsFolder;
+import java.util.Map;
+
+import static com.codeborne.selenide.Configuration.*;
+import static org.junit.jupiter.api.Assertions.assertEquals;
 
 @ExtendWith({ScreenShooterExtension.class})
 public class LoginPortalTest {
@@ -17,9 +18,20 @@ public class LoginPortalTest {
 
     @BeforeAll
     public static void setUp() {
-        baseUrl = "https://webdriveruniversity.com/";
-        //browser = "chrome";
-        reportsFolder = "target/screenshots";
+
+        if (remote.equals("http://localhost:4444/wd/hub")){
+            Map<String, Object> selenoidOptions = Map.of(
+                    "enableVNC", true,
+                    "enableLog", true
+//                ,"enableVideo", true
+            );
+
+            DesiredCapabilities options = new DesiredCapabilities();
+            options.setCapability("selenoid:options", selenoidOptions);
+            browserCapabilities = options;
+        } else {
+            remote = null;
+        }
     }
 
     @Test
@@ -28,7 +40,7 @@ public class LoginPortalTest {
 
         loginPortalPage.login("user1", "pass1");
 
-        Assertions.assertEquals(loginPortalPage.alertText(), "validation failed");
+        assertEquals("validation! failed", loginPortalPage.alertText());
         loginPortalPage.acceptAlert();
     }
 }
